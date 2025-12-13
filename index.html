@@ -18,33 +18,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-body {
-    background: #f4f6f9;
-}
-.card {
-    border-radius: 15px;
-}
-.paid-row {
-    background-color: #d4edda !important;
-}
-.remaining-row {
-    background-color: #ffffff;
-}
-.table thead {
-    background: #0d6efd;
-    color: white;
-}
-.summary-box {
-    font-size: 16px;
-}
-@media (max-width: 768px) {
-    h2 {
-        font-size: 22px;
-    }
-    .summary-box {
-        text-align: center;
-        margin-bottom: 10px;
-    }
+body { background:#f4f6f9; }
+.card { border-radius:15px; }
+.paid-row { background:#d4edda!important; }
+.remaining-row { background:#fff; }
+.table thead { background:#0d6efd; color:#fff; }
+.summary-box { font-size:16px; }
+@media(max-width:768px){
+  h2{font-size:22px;}
 }
 </style>
 </head>
@@ -52,204 +33,195 @@ body {
 <body>
 
 <div class="container mt-3">
-    <h2 class="text-center mb-3">🏠 Home Loan Tracker</h2>
+<h2 class="text-center mb-3">🏠 Home Loan Tracker</h2>
 
-    <!-- INPUT -->
-    <div class="card shadow p-3">
-        <div class="row g-2">
-            <div class="col-12 col-md-3">
-                <label>Loan Start Month</label>
-                <input type="month" id="startMonth" class="form-control">
-            </div>
-            <div class="col-6 col-md-2">
-                <label>Tenure (Years)</label>
-                <input type="number" id="tenure" class="form-control">
-            </div>
-            <div class="col-6 col-md-3">
-                <label>Loan Amount (₹)</label>
-                <input type="number" id="loanAmount" class="form-control">
-            </div>
-            <div class="col-6 col-md-2">
-                <label>Interest %</label>
-                <input type="number" step="0.01" id="interest" class="form-control">
-            </div>
-            <div class="col-6 col-md-2 d-grid">
-                <label>&nbsp;</label>
-                <button id="calculate" class="btn btn-primary">Calculate</button>
-            </div>
-        </div>
+<!-- INPUT -->
+<div class="card shadow p-3">
+  <div class="row g-2">
+    <div class="col-12 col-md-3">
+      <label>Loan Start Date</label>
+      <input type="date" id="startDate" class="form-control">
     </div>
-
-    <!-- RESULT -->
-    <div id="result" class="mt-4" style="display:none;">
-
-        <!-- SUMMARY -->
-        <div class="row text-center">
-            <div class="col-12 col-md-4">
-                <div class="card shadow p-2 summary-box">
-                    <strong>Total Paid Till Today</strong><br>
-                    ₹ <span id="totalPaid"></span>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="card shadow p-2 summary-box">
-                    <strong>Remaining Loan</strong><br>
-                    ₹ <span id="remainingLoan"></span>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="card shadow p-2 summary-box">
-                    <strong>Monthly EMI</strong><br>
-                    ₹ <span id="emiAmount"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- BUTTONS -->
-        <div class="row mt-3">
-            <div class="col-6 d-grid">
-                <button class="btn btn-success" onclick="exportExcel()">Export Excel</button>
-            </div>
-            <div class="col-6 d-grid">
-                <button class="btn btn-dark" onclick="scrollToChart()">View Chart</button>
-            </div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="card shadow mt-3">
-            <div class="card-body table-responsive">
-                <table class="table table-bordered table-sm">
-                    <thead>
-                        <tr>
-                            <th>EMI Month</th>
-                            <th>Principal</th>
-                            <th>Interest</th>
-                            <th>EMI</th>
-                            <th>Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody id="emiTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- CHART -->
-        <div class="card shadow mt-3" id="chartSection">
-            <div class="card-body">
-                <canvas id="emiChart"></canvas>
-            </div>
-        </div>
-
+    <div class="col-6 col-md-2">
+      <label>Tenure (Years)</label>
+      <input type="number" id="tenure" class="form-control">
     </div>
+    <div class="col-6 col-md-3">
+      <label>Loan Amount (₹)</label>
+      <input type="number" id="loanAmount" class="form-control">
+    </div>
+    <div class="col-6 col-md-2">
+      <label>Interest %</label>
+      <input type="number" step="0.01" id="interest" class="form-control">
+    </div>
+    <div class="col-6 col-md-2 d-grid">
+      <label>&nbsp;</label>
+      <button id="calculate" class="btn btn-primary">Calculate</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="mt-4" style="display:none;">
+
+  <!-- SUMMARY -->
+  <div class="row text-center">
+    <div class="col-md-4 col-12">
+      <div class="card shadow p-2 summary-box">
+        <strong>Total Paid Till Today</strong><br>
+        ₹ <span id="totalPaid"></span>
+      </div>
+    </div>
+    <div class="col-md-4 col-12">
+      <div class="card shadow p-2 summary-box">
+        <strong>Remaining Loan</strong><br>
+        ₹ <span id="remainingLoan"></span>
+      </div>
+    </div>
+    <div class="col-md-4 col-12">
+      <div class="card shadow p-2 summary-box">
+        <strong>Monthly EMI</strong><br>
+        ₹ <span id="emiAmount"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="row mt-3">
+    <div class="col-6 d-grid">
+      <button class="btn btn-success" onclick="exportExcel()">Export Excel</button>
+    </div>
+    <div class="col-6 d-grid">
+      <button class="btn btn-dark" onclick="scrollToChart()">View Chart</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card shadow mt-3">
+    <div class="card-body table-responsive">
+      <table class="table table-bordered table-sm">
+        <thead>
+          <tr>
+            <th>EMI Date</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>EMI</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody id="emiTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="card shadow mt-3" id="chartSection">
+    <div class="card-body">
+      <canvas id="emiChart"></canvas>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <script>
 let chart;
 
-$("#calculate").click(function () {
+$("#calculate").click(function(){
 
-    let startMonth = $("#startMonth").val();
-    let tenureYears = +$("#tenure").val();
-    let loanAmount = +$("#loanAmount").val();
-    let interest = +$("#interest").val();
+  let startDate = new Date($("#startDate").val());
+  let tenureYears = +$("#tenure").val();
+  let loanAmount = +$("#loanAmount").val();
+  let interest = +$("#interest").val();
 
-    if (!startMonth || !tenureYears || !loanAmount || !interest) {
-        alert("Please fill all fields");
-        return;
+  if(!startDate || !tenureYears || !loanAmount || !interest){
+    alert("Please fill all fields");
+    return;
+  }
+
+  let months = tenureYears * 12;
+  let rate = interest / 12 / 100;
+
+  let emi = loanAmount * rate * Math.pow(1+rate,months) /
+            (Math.pow(1+rate,months)-1);
+  emi = Math.round(emi);
+
+  let balance = loanAmount;
+  let remainingBalance = loanAmount;
+  let totalPaid = 0;
+
+  let today = new Date();
+  let labels=[], principalArr=[], interestArr=[], balanceArr=[];
+
+  $("#emiTable").html("");
+
+  for(let i=1;i<=months;i++){
+
+    let interestPart = Math.round(balance * rate);
+    let principalPart = emi - interestPart;
+    balance -= principalPart;
+    if(balance<0) balance=0;
+
+    let emiDate = new Date(startDate);
+    emiDate.setMonth(startDate.getMonth() + i);
+
+    let paid = emiDate <= today;
+    if(paid){
+      totalPaid += emi;
+      remainingBalance = balance;
     }
 
-    let months = tenureYears * 12;
-    let monthlyRate = interest / 12 / 100;
-    let emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) /
-              (Math.pow(1 + monthlyRate, months) - 1);
-    emi = Math.round(emi);
+    let rowClass = paid ? "paid-row":"remaining-row";
+    let label = emiDate.toLocaleDateString("en-IN");
 
-    let balance = loanAmount;
-    let remainingBalance = loanAmount;
-    let totalPaid = 0;
+    labels.push(label);
+    principalArr.push(principalPart);
+    interestArr.push(interestPart);
+    balanceArr.push(balance);
 
-    let today = new Date();
-    let startDate = new Date(startMonth + "-01");
+    $("#emiTable").append(`
+      <tr class="${rowClass}">
+        <td>${label}</td>
+        <td>${principalPart.toLocaleString()}</td>
+        <td>${interestPart.toLocaleString()}</td>
+        <td>${emi.toLocaleString()}</td>
+        <td>${Math.round(balance).toLocaleString()}</td>
+      </tr>
+    `);
+  }
 
-    let labels = [], principalArr = [], interestArr = [], balanceArr = [];
+  $("#emiAmount").text(emi.toLocaleString());
+  $("#totalPaid").text(totalPaid.toLocaleString());
+  $("#remainingLoan").text(Math.round(remainingBalance).toLocaleString());
 
-    $("#emiTable").html("");
+  $("#result").fadeIn();
+  $('html,body').animate({scrollTop:$("#result").offset().top},500);
 
-    for (let i = 1; i <= months; i++) {
-
-        let interestPart = Math.round(balance * monthlyRate);
-        let principalPart = emi - interestPart;
-        balance -= principalPart;
-        if (balance < 0) balance = 0;
-
-        let emiDate = new Date(startDate);
-        emiDate.setMonth(startDate.getMonth() + i - 1);
-
-        let paid = emiDate <= today;
-
-        if (paid) {
-            totalPaid += emi;
-            remainingBalance = balance;
-        }
-
-        let rowClass = paid ? "paid-row" : "remaining-row";
-        let label = emiDate.toLocaleDateString("en-IN", {month:"short", year:"numeric"});
-
-        labels.push(label);
-        principalArr.push(principalPart);
-        interestArr.push(interestPart);
-        balanceArr.push(balance);
-
-        $("#emiTable").append(`
-            <tr class="${rowClass}">
-                <td>${label}</td>
-                <td>${principalPart.toLocaleString()}</td>
-                <td>${interestPart.toLocaleString()}</td>
-                <td>${emi.toLocaleString()}</td>
-                <td>${Math.round(balance).toLocaleString()}</td>
-            </tr>
-        `);
-    }
-
-    $("#emiAmount").text(emi.toLocaleString());
-    $("#totalPaid").text(totalPaid.toLocaleString());
-    $("#remainingLoan").text(Math.round(remainingBalance).toLocaleString());
-
-    $("#result").fadeIn();
-    $('html, body').animate({ scrollTop: $("#result").offset().top }, 500);
-
-    renderChart(labels, principalArr, interestArr, balanceArr);
+  renderChart(labels,principalArr,interestArr,balanceArr);
 });
 
-function renderChart(labels, principal, interest, balance) {
-    if (chart) chart.destroy();
-
-    chart = new Chart(document.getElementById("emiChart"), {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [
-                { label: 'Principal', data: principal },
-                { label: 'Interest', data: interest },
-                { label: 'Balance', data: balance }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
+function renderChart(labels,p,i,b){
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById("emiChart"),{
+    type:"line",
+    data:{
+      labels,
+      datasets:[
+        {label:"Principal",data:p},
+        {label:"Interest",data:i},
+        {label:"Balance",data:b}
+      ]
+    },
+    options:{responsive:true}
+  });
 }
 
-function exportExcel() {
-    let wb = XLSX.utils.table_to_book(document.querySelector("table"));
-    XLSX.writeFile(wb, "Home_Loan_EMI.xlsx");
+function exportExcel(){
+  let wb=XLSX.utils.table_to_book(document.querySelector("table"));
+  XLSX.writeFile(wb,"Home_Loan_EMI.xlsx");
 }
-
-function scrollToChart() {
-    $('html, body').animate({
-        scrollTop: $("#chartSection").offset().top
-    }, 500);
+function scrollToChart(){
+  $('html,body').animate({scrollTop:$("#chartSection").offset().top},500);
 }
 </script>
 
