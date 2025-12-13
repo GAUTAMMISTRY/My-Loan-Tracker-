@@ -21,7 +21,7 @@
 body { background:#f4f6f9; }
 .card { border-radius:15px; }
 .paid-row { background:#d4edda!important; }
-.remaining-row { background:#fff; }
+.remaining-row { background:#ffffff; }
 .table thead { background:#0d6efd; color:#fff; }
 .summary-box { font-size:16px; }
 @media(max-width:768px){
@@ -39,8 +39,8 @@ body { background:#f4f6f9; }
 <div class="card shadow p-3">
   <div class="row g-2">
     <div class="col-12 col-md-3">
-      <label>Loan Start Date</label>
-      <input type="date" id="startDate" class="form-control">
+      <label>First EMI Date</label>
+      <input type="date" id="firstEmiDate" class="form-control">
     </div>
     <div class="col-6 col-md-2">
       <label>Tenure (Years)</label>
@@ -129,12 +129,12 @@ let chart;
 
 $("#calculate").click(function(){
 
-  let startDate = new Date($("#startDate").val());
+  let firstEmiDate = new Date($("#firstEmiDate").val());
   let tenureYears = +$("#tenure").val();
   let loanAmount = +$("#loanAmount").val();
   let interest = +$("#interest").val();
 
-  if(!startDate || !tenureYears || !loanAmount || !interest){
+  if(!$("#firstEmiDate").val() || !tenureYears || !loanAmount || !interest){
     alert("Please fill all fields");
     return;
   }
@@ -155,15 +155,15 @@ $("#calculate").click(function(){
 
   $("#emiTable").html("");
 
-  for(let i=1;i<=months;i++){
+  for(let i=0;i<months;i++){
+
+    let emiDate = new Date(firstEmiDate);
+    emiDate.setMonth(firstEmiDate.getMonth() + i);
 
     let interestPart = Math.round(balance * rate);
     let principalPart = emi - interestPart;
     balance -= principalPart;
-    if(balance<0) balance=0;
-
-    let emiDate = new Date(startDate);
-    emiDate.setMonth(startDate.getMonth() + i);
+    if(balance < 0) balance = 0;
 
     let paid = emiDate <= today;
     if(paid){
@@ -217,7 +217,7 @@ function renderChart(labels,p,i,b){
 }
 
 function exportExcel(){
-  let wb=XLSX.utils.table_to_book(document.querySelector("table"));
+  let wb = XLSX.utils.table_to_book(document.querySelector("table"));
   XLSX.writeFile(wb,"Home_Loan_EMI.xlsx");
 }
 function scrollToChart(){
