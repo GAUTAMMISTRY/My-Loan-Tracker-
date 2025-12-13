@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Home Loan Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,7 +14,7 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Excel Export -->
+<!-- Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
@@ -34,99 +35,106 @@ body {
     color: white;
 }
 .summary-box {
-    font-size: 18px;
+    font-size: 16px;
+}
+@media (max-width: 768px) {
+    h2 {
+        font-size: 22px;
+    }
+    .summary-box {
+        text-align: center;
+        margin-bottom: 10px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">🏠 Home Loan Tracker</h2>
+<div class="container mt-3">
+    <h2 class="text-center mb-3">🏠 Home Loan Tracker</h2>
 
     <!-- INPUT -->
-    <div class="card shadow p-4">
-        <div class="row g-3">
-            <div class="col-md-3">
+    <div class="card shadow p-3">
+        <div class="row g-2">
+            <div class="col-12 col-md-3">
                 <label>Loan Start Month</label>
                 <input type="month" id="startMonth" class="form-control">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
                 <label>Tenure (Years)</label>
-                <input type="number" id="tenure" class="form-control" placeholder="20">
+                <input type="number" id="tenure" class="form-control">
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <label>Loan Amount (₹)</label>
-                <input type="number" id="loanAmount" class="form-control" placeholder="2000000">
+                <input type="number" id="loanAmount" class="form-control">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
                 <label>Interest %</label>
-                <input type="number" step="0.01" id="interest" class="form-control" placeholder="8.5">
+                <input type="number" step="0.01" id="interest" class="form-control">
             </div>
-            <div class="col-md-2 d-grid">
+            <div class="col-6 col-md-2 d-grid">
                 <label>&nbsp;</label>
-                <button id="calculate" class="btn btn-primary btn-lg">OK</button>
+                <button id="calculate" class="btn btn-primary">Calculate</button>
             </div>
         </div>
     </div>
 
     <!-- RESULT -->
-    <div id="result" class="mt-5" style="display:none;">
+    <div id="result" class="mt-4" style="display:none;">
 
         <!-- SUMMARY -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card shadow p-3 summary-box">
-                    <strong>Total Paid Till Now</strong><br>
+        <div class="row text-center">
+            <div class="col-12 col-md-4">
+                <div class="card shadow p-2 summary-box">
+                    <strong>Total Paid Till Today</strong><br>
                     ₹ <span id="totalPaid"></span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card shadow p-3 summary-box">
+            <div class="col-12 col-md-4">
+                <div class="card shadow p-2 summary-box">
                     <strong>Remaining Loan</strong><br>
                     ₹ <span id="remainingLoan"></span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card shadow p-3 summary-box">
+            <div class="col-12 col-md-4">
+                <div class="card shadow p-2 summary-box">
                     <strong>Monthly EMI</strong><br>
                     ₹ <span id="emiAmount"></span>
                 </div>
             </div>
         </div>
 
-        <!-- ACTION BUTTONS -->
-        <div class="row mb-3">
-            <div class="col-md-6 d-grid">
-                <button class="btn btn-success" onclick="exportExcel()">⬇ Export to Excel</button>
+        <!-- BUTTONS -->
+        <div class="row mt-3">
+            <div class="col-6 d-grid">
+                <button class="btn btn-success" onclick="exportExcel()">Export Excel</button>
             </div>
-            <div class="col-md-6 d-grid">
-                <button class="btn btn-dark" onclick="scrollToChart()">📊 View EMI Chart</button>
+            <div class="col-6 d-grid">
+                <button class="btn btn-dark" onclick="scrollToChart()">View Chart</button>
             </div>
         </div>
 
         <!-- TABLE -->
-        <div class="card shadow">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>EMI Date</th>
-                                <th>Principal (₹)</th>
-                                <th>Interest (₹)</th>
-                                <th>Total EMI (₹)</th>
-                                <th>Balance (₹)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="emiTable"></tbody>
-                    </table>
-                </div>
+        <div class="card shadow mt-3">
+            <div class="card-body table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>EMI Month</th>
+                            <th>Principal</th>
+                            <th>Interest</th>
+                            <th>EMI</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emiTable"></tbody>
+                </table>
             </div>
         </div>
 
         <!-- CHART -->
-        <div class="card shadow mt-4" id="chartSection">
+        <div class="card shadow mt-3" id="chartSection">
             <div class="card-body">
                 <canvas id="emiChart"></canvas>
             </div>
@@ -141,9 +149,9 @@ let chart;
 $("#calculate").click(function () {
 
     let startMonth = $("#startMonth").val();
-    let tenureYears = parseInt($("#tenure").val());
-    let loanAmount = parseFloat($("#loanAmount").val());
-    let interest = parseFloat($("#interest").val());
+    let tenureYears = +$("#tenure").val();
+    let loanAmount = +$("#loanAmount").val();
+    let interest = +$("#interest").val();
 
     if (!startMonth || !tenureYears || !loanAmount || !interest) {
         alert("Please fill all fields");
@@ -152,20 +160,20 @@ $("#calculate").click(function () {
 
     let months = tenureYears * 12;
     let monthlyRate = interest / 12 / 100;
-
     let emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) /
               (Math.pow(1 + monthlyRate, months) - 1);
     emi = Math.round(emi);
 
     let balance = loanAmount;
+    let remainingBalance = loanAmount;
     let totalPaid = 0;
+
     let today = new Date();
+    let startDate = new Date(startMonth + "-01");
 
     let labels = [], principalArr = [], interestArr = [], balanceArr = [];
 
     $("#emiTable").html("");
-
-    let startDate = new Date(startMonth + "-01");
 
     for (let i = 1; i <= months; i++) {
 
@@ -175,19 +183,22 @@ $("#calculate").click(function () {
         if (balance < 0) balance = 0;
 
         let emiDate = new Date(startDate);
-        emiDate.setMonth(emiDate.getMonth() + i - 1);
+        emiDate.setMonth(startDate.getMonth() + i - 1);
 
         let paid = emiDate <= today;
-        if (paid) totalPaid += emi;
+
+        if (paid) {
+            totalPaid += emi;
+            remainingBalance = balance;
+        }
 
         let rowClass = paid ? "paid-row" : "remaining-row";
-
         let label = emiDate.toLocaleDateString("en-IN", {month:"short", year:"numeric"});
 
         labels.push(label);
         principalArr.push(principalPart);
         interestArr.push(interestPart);
-        balanceArr.push(Math.round(balance));
+        balanceArr.push(balance);
 
         $("#emiTable").append(`
             <tr class="${rowClass}">
@@ -202,50 +213,46 @@ $("#calculate").click(function () {
 
     $("#emiAmount").text(emi.toLocaleString());
     $("#totalPaid").text(totalPaid.toLocaleString());
-    $("#remainingLoan").text(Math.round(balance).toLocaleString());
+    $("#remainingLoan").text(Math.round(remainingBalance).toLocaleString());
 
     $("#result").fadeIn();
-    $('html, body').animate({ scrollTop: $("#result").offset().top }, 600);
+    $('html, body').animate({ scrollTop: $("#result").offset().top }, 500);
 
     renderChart(labels, principalArr, interestArr, balanceArr);
 });
 
 function renderChart(labels, principal, interest, balance) {
-
     if (chart) chart.destroy();
 
     chart = new Chart(document.getElementById("emiChart"), {
         type: 'line',
         data: {
-            labels: labels,
+            labels,
             datasets: [
-                { label: 'Principal', data: principal, borderWidth: 2 },
-                { label: 'Interest', data: interest, borderWidth: 2 },
-                { label: 'Remaining Balance', data: balance, borderWidth: 2 }
+                { label: 'Principal', data: principal },
+                { label: 'Interest', data: interest },
+                { label: 'Balance', data: balance }
             ]
         },
         options: {
             responsive: true,
-            interaction: {
-                mode: 'index',
-                intersect: false
-            }
+            maintainAspectRatio: false
         }
     });
 }
 
 function exportExcel() {
-    let table = document.querySelector("table");
-    let wb = XLSX.utils.table_to_book(table, { sheet: "EMI Schedule" });
-    XLSX.writeFile(wb, "Home_Loan_EMI_Schedule.xlsx");
+    let wb = XLSX.utils.table_to_book(document.querySelector("table"));
+    XLSX.writeFile(wb, "Home_Loan_EMI.xlsx");
 }
 
 function scrollToChart() {
     $('html, body').animate({
         scrollTop: $("#chartSection").offset().top
-    }, 600);
+    }, 500);
 }
 </script>
 
 </body>
 </html>
+
