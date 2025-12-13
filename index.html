@@ -64,7 +64,7 @@ body { background:#f4f6f9; }
 <!-- RESULT -->
 <div id="result" class="mt-4" style="display:none;">
 
-  <!-- SUMMARY -->
+  <!-- SUMMARY ROW 1 -->
   <div class="row text-center">
     <div class="col-md-4 col-12">
       <div class="card shadow p-2 summary-box">
@@ -82,6 +82,16 @@ body { background:#f4f6f9; }
       <div class="card shadow p-2 summary-box">
         <strong>Monthly EMI</strong><br>
         ₹ <span id="emiAmount"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY ROW 2 (NEW CARD) -->
+  <div class="row text-center mt-2">
+    <div class="col-md-4 col-12 mx-auto">
+      <div class="card shadow p-2 summary-box border-success">
+        <strong>Total Amount (With Interest)</strong><br>
+        ₹ <span id="totalPayable"></span>
       </div>
     </div>
   </div>
@@ -129,22 +139,25 @@ let chart;
 
 $("#calculate").click(function(){
 
-  let firstEmiDate = new Date($("#firstEmiDate").val());
+  let firstEmiDateVal = $("#firstEmiDate").val();
   let tenureYears = +$("#tenure").val();
   let loanAmount = +$("#loanAmount").val();
   let interest = +$("#interest").val();
 
-  if(!$("#firstEmiDate").val() || !tenureYears || !loanAmount || !interest){
+  if(!firstEmiDateVal || !tenureYears || !loanAmount || !interest){
     alert("Please fill all fields");
     return;
   }
 
+  let firstEmiDate = new Date(firstEmiDateVal);
   let months = tenureYears * 12;
   let rate = interest / 12 / 100;
 
   let emi = loanAmount * rate * Math.pow(1+rate,months) /
             (Math.pow(1+rate,months)-1);
   emi = Math.round(emi);
+
+  let totalPayable = emi * months;
 
   let balance = loanAmount;
   let remainingBalance = loanAmount;
@@ -172,16 +185,15 @@ $("#calculate").click(function(){
     }
 
     let rowClass = paid ? "paid-row":"remaining-row";
-    let label = emiDate.toLocaleDateString("en-IN");
 
-    labels.push(label);
+    labels.push(emiDate.toLocaleDateString("en-IN"));
     principalArr.push(principalPart);
     interestArr.push(interestPart);
     balanceArr.push(balance);
 
     $("#emiTable").append(`
       <tr class="${rowClass}">
-        <td>${label}</td>
+        <td>${emiDate.toLocaleDateString("en-IN")}</td>
         <td>${principalPart.toLocaleString()}</td>
         <td>${interestPart.toLocaleString()}</td>
         <td>${emi.toLocaleString()}</td>
@@ -193,6 +205,7 @@ $("#calculate").click(function(){
   $("#emiAmount").text(emi.toLocaleString());
   $("#totalPaid").text(totalPaid.toLocaleString());
   $("#remainingLoan").text(Math.round(remainingBalance).toLocaleString());
+  $("#totalPayable").text(totalPayable.toLocaleString());
 
   $("#result").fadeIn();
   $('html,body').animate({scrollTop:$("#result").offset().top},500);
@@ -202,7 +215,7 @@ $("#calculate").click(function(){
 
 function renderChart(labels,p,i,b){
   if(chart) chart.destroy();
-  chart=new Chart(document.getElementById("emiChart"),{
+  chart = new Chart(document.getElementById("emiChart"),{
     type:"line",
     data:{
       labels,
@@ -227,4 +240,5 @@ function scrollToChart(){
 
 </body>
 </html>
+
 
