@@ -1,15 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Smart Home Loan Tracker</title>
+<title>Home Loan Tracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -21,53 +22,60 @@
 <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
+<!-- Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <style>
-body{
-  font-family:'Inter',sans-serif;
-  background:linear-gradient(135deg,#eef2ff,#f8fafc);
+:root {
+  --primary: #4f46e5;
+  --secondary: #22c55e;
+  --dark: #0f172a;
+  --light: #f8fafc;
 }
-.glass{
-  background:rgba(255,255,255,.8);
-  backdrop-filter:blur(14px);
-  border-radius:18px;
-  box-shadow:0 15px 40px rgba(0,0,0,.08);
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg,#eef2ff,#f8fafc);
+  color: var(--dark);
 }
-.header{
-  background:linear-gradient(135deg,#4f46e5,#6366f1);
-  color:#fff;
-  border-radius:18px;
-  padding:20px;
+.glass {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
 }
-.btn-main{
-  background:linear-gradient(135deg,#4f46e5,#6366f1);
-  border:none;
-  color:#fff;
-  border-radius:14px;
-  font-weight:600;
-  padding:12px;
+.header {
+  background: linear-gradient(135deg,var(--primary),#6366f1);
+  color: #fff;
+  border-radius: 20px;
+  padding: 20px;
 }
-.btn-prepay{
-  background:linear-gradient(135deg,#16a34a,#22c55e);
-  border:none;
-  color:#fff;
-  border-radius:14px;
-  font-weight:600;
-  padding:12px;
+.btn-primary {
+  background: linear-gradient(135deg,var(--primary),#6366f1);
+  border: none;
+  border-radius: 14px;
+  font-weight: 600;
 }
-.summary{
-  background:#fff;
-  border-radius:14px;
-  padding:15px;
-  text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,.06);
+.btn-success {
+  background: linear-gradient(135deg,#16a34a,#22c55e);
+  border: none;
+  border-radius: 14px;
+  font-weight: 600;
 }
-.summary span{
-  font-weight:700;
-  font-size:18px;
+.btn-dark { border-radius: 14px; }
+.summary-card {
+  border-radius: 18px;
+  padding: 15px;
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
 }
-canvas{max-height:280px;}
-.swiper{padding-bottom:30px;}
-.swiper-pagination-bullet-active{background:#4f46e5;}
+.summary-card span {
+  font-size: 20px;
+  font-weight: 700;
+}
+.paid-row { background: #ecfdf5!important; }
+.remaining-row { background: #fff; }
+canvas { max-height: 300px; }
+.swiper-pagination-bullet-active { background: var(--primary); }
 </style>
 </head>
 
@@ -75,176 +83,215 @@ canvas{max-height:280px;}
 
 <div class="container my-4">
 
-<div class="header text-center mb-4">
-  <h3>🏠 Smart Home Loan Tracker</h3>
-  <small>Swipe charts • Prepayment impact • Animated insights</small>
+<!-- HEADER -->
+<div class="header text-center mb-4 glass">
+  <h2 class="fw-bold mb-1">🏠 Home Loan Tracker</h2>
+  <p class="mb-0 opacity-75">Smart EMI insights • Bank-accurate</p>
 </div>
 
 <!-- INPUT -->
-<div class="glass p-4 mb-4">
+<div class="glass p-4 mb-4 border border-success">
   <div class="row g-3">
     <div class="col-md-3">
       <label>First EMI Date</label>
-      <input type="date" id="emiDate" class="form-control">
+      <input type="date" id="firstEmiDate" class="form-control">
     </div>
     <div class="col-md-2">
       <label>Tenure (Years)</label>
       <input type="number" id="tenure" class="form-control">
     </div>
     <div class="col-md-3">
-      <label>Loan Amount ₹</label>
-      <input type="number" id="loan" class="form-control">
+      <label>Loan Amount (₹)</label>
+      <input type="number" id="loanAmount" class="form-control">
     </div>
     <div class="col-md-2">
       <label>Interest %</label>
-      <input type="number" step="0.01" id="rate" class="form-control">
+      <input type="number" step="0.01" id="interest" class="form-control">
     </div>
     <div class="col-md-2 d-grid">
       <label>&nbsp;</label>
-      <button class="btn btn-main" id="calc">Calculate</button>
+      <button id="calculate" class="btn btn-primary">Calculate</button>
     </div>
   </div>
 </div>
 
-<!-- SUMMARY -->
+<!-- RESULT -->
 <div id="result" style="display:none">
-<div class="row g-2 mb-3">
-  <div class="col-6 col-md-3"><div class="summary">EMI<br>₹ <span id="emi"></span></div></div>
-  <div class="col-6 col-md-3"><div class="summary">Total Paid<br>₹ <span id="paid"></span></div></div>
-  <div class="col-6 col-md-3"><div class="summary">Remaining<br>₹ <span id="remain"></span></div></div>
-  <div class="col-6 col-md-3"><div class="summary">Interest<br>₹ <span id="interestTotal"></span></div></div>
+
+<!-- SUMMARY -->
+<div class="row text-center mb-3">
+  <div class="col-md-3 col-6">
+    <div class="summary-card border border-success">
+      <small>Total Paid</small><br>₹ <span id="totalPaid"></span>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="summary-card border border-success">
+      <small>Remaining</small><br>₹ <span id="remainingLoan"></span>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 mt-2 mt-md-0">
+    <div class="summary-card border border-success">
+      <small>Monthly EMI</small><br>₹ <span id="emiAmount"></span>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 mt-2 mt-md-0">
+    <div class="summary-card border border-success">
+      <small>Total Payable</small><br>₹ <span id="totalPayable"></span>
+    </div>
+  </div>
 </div>
 
-<!-- PREPAYMENT -->
-<div class="glass p-3 mb-4">
-  <h6>🧮 Prepayment / Part-Payment</h6>
+<!-- OPTIONAL PREPAYMENT -->
+<div class="glass p-3 mb-3 border border-success">
+  <h6 class="fw-semibold mb-2">🧮 Optional Prepayment</h6>
   <div class="row g-2 align-items-end">
     <div class="col-md-4">
-      <input type="number" id="prepay" class="form-control" placeholder="Enter prepayment amount ₹">
+      <input type="number" id="prepayAmount" class="form-control" placeholder="Enter prepayment amount ₹">
     </div>
     <div class="col-md-2 d-grid">
-      <button class="btn btn-prepay" id="applyPrepay">Apply</button>
+      <button class="btn btn-success" id="applyPrepay">Apply</button>
     </div>
     <div class="col-md-6">
       <small>
-        Interest Saved: ₹ <b id="saved">0</b> |
-        New Balance: ₹ <b id="newBalance">0</b>
+        New Balance: ₹ <b id="newBalance">0</b> |
+        Interest Saved: ₹ <b id="interestSaved">0</b>
       </small>
     </div>
   </div>
 </div>
 
+<!-- TABLE -->
+<div class="glass p-3 mb-4">
+  <div class="table-responsive border border-success">
+    <table class="table table-bordered table-sm">
+      <thead>
+        <tr>
+          <th>EMI Date</th>
+          <th>Principal</th>
+          <th>Interest</th>
+          <th>EMI</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="emiTable"></tbody>
+    </table>
+  </div>
+</div>
+
 <!-- SWIPEABLE CHARTS -->
-<div class="glass p-3">
-<div class="swiper">
-<div class="swiper-wrapper">
-
-<div class="swiper-slide">
-  <canvas id="lineChart"></canvas>
-</div>
-
-<div class="swiper-slide">
-  <canvas id="donutChart"></canvas>
-</div>
-
-<div class="swiper-slide">
-  <canvas id="progressChart"></canvas>
+<div class="glass p-3" id="chartSection">
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide"><canvas id="emiChart"></canvas></div>
+      <div class="swiper-slide"><canvas id="donutChart"></canvas></div>
+      <div class="swiper-slide"><canvas id="prepayChart"></canvas></div>
+    </div>
+    <div class="swiper-pagination"></div>
+  </div>
 </div>
 
 </div>
-<div class="swiper-pagination"></div>
-</div>
-</div>
-
 </div>
 
 <script>
-let lineChart, donutChart, progressChart;
-let balanceGlobal, totalInterestGlobal;
+let chart, donutChart, prepayChart;
+let remainingGlobal = 0, totalInterestGlobal = 0;
 
-$("#calc").click(function(){
-  let loan=+$("#loan").val();
-  let rate=+$("#rate").val()/12/100;
-  let months=+$("#tenure").val()*12;
+$("#calculate").click(function(){
+  let firstEmiDateVal=$("#firstEmiDate").val();
+  let tenure=+$("#tenure").val();
+  let loan=+$("#loanAmount").val();
+  let interest=+$("#interest").val();
+  if(!firstEmiDateVal||!tenure||!loan||!interest){alert("Fill all fields");return;}
 
+  let firstEmiDate=new Date(firstEmiDateVal);
+  let months=tenure*12;
+  let rate=interest/12/100;
   let emi=Math.round(loan*rate*Math.pow(1+rate,months)/(Math.pow(1+rate,months)-1));
-  let balance=loan, paid=0, interestTotal=0;
+  let totalPayable=emi*months;
 
-  let labels=[], bal=[], paidArr=[];
+  let balance=loan,totalPaid=0;
+  let labels=[],p=[],i=[],b=[];
+  let today=new Date();
+  totalInterestGlobal=0;
 
-  for(let i=1;i<=months;i++){
-    let interest=balance*rate;
-    let principal=emi-interest;
-    balance-=principal;
-    paid+=emi;
-    interestTotal+=interest;
+  $("#emiTable").html("");
 
-    labels.push("M"+i);
-    bal.push(balance<0?0:balance);
-    paidArr.push(paid);
+  for(let x=0;x<months;x++){
+    let emiDate=new Date(firstEmiDate);
+    emiDate.setMonth(firstEmiDate.getMonth()+x);
+
+    let interestPart=Math.round(balance*rate);
+    let principalPart=emi-interestPart;
+    balance-=principalPart;if(balance<0)balance=0;
+    totalInterestGlobal+=interestPart;
+
+    if(emiDate<=today){totalPaid+=emi;remainingGlobal=balance;}
+
+    labels.push(emiDate.toLocaleDateString("en-IN"));
+    p.push(principalPart); i.push(interestPart); b.push(balance);
+
+    $("#emiTable").append(`
+      <tr class="${emiDate<=today?'paid-row':'remaining-row'}">
+        <td>${emiDate.toLocaleDateString("en-IN")}</td>
+        <td>${principalPart.toLocaleString()}</td>
+        <td>${interestPart.toLocaleString()}</td>
+        <td>${emi.toLocaleString()}</td>
+        <td>${Math.round(balance).toLocaleString()}</td>
+      </tr>
+    `);
   }
 
-  balanceGlobal=balance;
-  totalInterestGlobal=interestTotal;
-
-  $("#emi").text(emi.toLocaleString());
-  $("#paid").text(paid.toLocaleString());
-  $("#remain").text(Math.round(balance).toLocaleString());
-  $("#interestTotal").text(Math.round(interestTotal).toLocaleString());
-
+  $("#emiAmount").text(emi.toLocaleString());
+  $("#totalPaid").text(totalPaid.toLocaleString());
+  $("#remainingLoan").text(Math.round(remainingGlobal).toLocaleString());
+  $("#totalPayable").text(totalPayable.toLocaleString());
   $("#result").fadeIn();
 
-  renderCharts(labels, bal, paidArr, loan, interestTotal);
+  renderCharts(labels,p,i,b,loan);
 });
 
-function renderCharts(l,b,p,loan,intt){
-  if(lineChart)lineChart.destroy();
-  lineChart=new Chart(lineChartEl(),{
-    type:'line',
+function renderCharts(l,p,i,b,loan){
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById("emiChart"),{
+    type:"line",
     data:{labels:l,datasets:[
-      {label:'Balance',data:b,fill:true},
+      {label:"Principal",data:p,fill:true},
+      {label:"Interest",data:i,fill:true},
+      {label:"Balance",data:b,fill:true}
     ]},
     options:{animation:{duration:1200}}
   });
 
   if(donutChart)donutChart.destroy();
-  donutChart=new Chart(donutChartEl(),{
-    type:'doughnut',
-    data:{labels:['Principal','Interest'],
-    datasets:[{data:[loan,intt]}]},
+  donutChart=new Chart(document.getElementById("donutChart"),{
+    type:"doughnut",
+    data:{labels:["Principal","Interest"],
+    datasets:[{data:[loan,totalInterestGlobal]}]},
     options:{animation:{animateRotate:true}}
   });
 
-  if(progressChart)progressChart.destroy();
-  progressChart=new Chart(progressChartEl(),{
-    type:'line',
-    data:{labels:l,datasets:[
-      {label:'Paid',data:p,fill:true}
-    ]},
-    options:{animation:{duration:1200}}
-  });
-
-  new Swiper('.swiper',{
-    pagination:{el:'.swiper-pagination'},
-    spaceBetween:20
-  });
+  new Swiper('.swiper',{pagination:{el:'.swiper-pagination'},spaceBetween:20});
 }
 
-function lineChartEl(){return document.getElementById("lineChart");}
-function donutChartEl(){return document.getElementById("donutChart");}
-function progressChartEl(){return document.getElementById("progressChart");}
-
 $("#applyPrepay").click(function(){
-  let pre=+$("#prepay").val();
-  if(!pre || pre<=0)return;
+  let prepay=+$("#prepayAmount").val();
+  if(!prepay||prepay<=0)return;
 
-  let newBal=balanceGlobal-pre;
-  if(newBal<0)newBal=0;
+  let newBal=remainingGlobal-prepay;if(newBal<0)newBal=0;
+  let saved=totalInterestGlobal*(prepay/(remainingGlobal+prepay));
 
-  let saved=totalInterestGlobal*(pre/(pre+newBal));
-
-  $("#saved").text(Math.round(saved).toLocaleString());
   $("#newBalance").text(Math.round(newBal).toLocaleString());
+  $("#interestSaved").text(Math.round(saved).toLocaleString());
+
+  if(prepayChart)prepayChart.destroy();
+  prepayChart=new Chart(document.getElementById("prepayChart"),{
+    type:"bar",
+    data:{labels:["Before","After"],
+    datasets:[{label:"Outstanding Balance",data:[remainingGlobal,newBal]}]},
+    options:{animation:{duration:1000}}
+  });
 });
 </script>
 
