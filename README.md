@@ -50,3 +50,52 @@ Built using **Bootstrap, jQuery, Chart.js**, and **Excel export**, this tool wor
 
 ## 📂 Project Structure
 
+home-loan-tracker/
+│
+├── index.html
+├── css/
+│ └── style.css
+├── js/
+│ └── script.js
+└── README.md
+
+
+
+📄 License
+
+This project is licensed under the MIT License – free to use, modify, and distribute.
+
+
+🙌 Support
+
+If you find this project useful, please ⭐ star the repository and share it with others.
+
+Happy loan tracking! 💰📊
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
