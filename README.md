@@ -1,4 +1,6 @@
 # 🏠 Home Loan Tracker – EMI Calculator & Amortization Schedule
+website https://gautammistry.github.io/My-Loan-Tracker-/
+
 
 **Home Loan Tracker** is a simple, fast, and fully client-side **home loan EMI calculator web app**.  
 It helps users calculate **monthly EMI**, view **principal & interest breakup**, track **remaining loan balance**, and analyze the **complete amortization schedule** using interactive charts.
